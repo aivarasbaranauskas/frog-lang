@@ -13,3 +13,7 @@
 5. **Ataskaita keliama į Moodle!**
 
 **Pastaba:** NENAUDOTI fork master repozitorijai - dirbti savo šakoje. Pull request'ai į MASTER šaką bus atmetami
+Projektą atliaka:
+Aivaras Baranauskas
+Dovilė Gedminaitė
+Tadas Radvilavičius
