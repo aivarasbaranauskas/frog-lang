@@ -30,7 +30,7 @@ Frog {
     FunCall = Identifier "(" Arguments ")"
     Arguments = ListOf<Expr, ",">
 
-    FunDef  = "func" Identifier "(" Parameters ")" Block
+    FunDef  = "func" Identifier "(" Parameters ")::" Type Block
     Parameters = ListOf<Definition, ",">
 
     qq = "\""
