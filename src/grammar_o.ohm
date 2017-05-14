@@ -1,0 +1,46 @@
+Frog {
+    Expr =  FunDef | IfExpr | Block | Assign | MathOp | Group | Identifier | Definition | Number | String | Bool
+
+    MathOp =  Mul | Div | Add | Sub | Eq | Neq | Lt | Lte | Gt | Gte | Term
+    Add = Expr "+"  Term
+    Sub = Expr "-"  Term
+    Mul = Expr "*"  Term
+    Div = Expr "/"  Term
+    Eq  = Expr "==" Expr
+    Neq = Expr "!=" Expr
+    Lt  = Expr "<"  Expr
+    Lte = Expr "<=" Expr
+    Gt  = Expr ">"  Expr
+    Gte = Expr ">=" Expr
+
+
+    Term = Group | FunCall | Identifier | Number | String | Bool
+
+    Definition = Identifier "::" Type
+    Type = "int" | "string" | "boolean"
+
+    Assign = Identifier "->" Expr
+    Identifier = letter (letter|digit)*
+
+    Group = "(" Expr ")"
+    Block = "{" Expr* "}"
+
+    IfExpr    = "if" Block Block ("else" Block)?
+    
+    FunCall = Identifier "(" Arguments ")"
+    Arguments = ListOf<Expr, ",">
+
+    FunDef  = "func" Identifier "(" Parameters ")::" Type Block
+    Parameters = ListOf<Definition, ",">
+
+    qq = "\""
+    String = qq (~qq any)+ qq
+
+    Bool = "true" | "false"
+
+    Number = int
+    int    = digit+
+
+    space := "\t" | " " | "\n" | comment
+    comment = "//" (~"\n" any)*
+}

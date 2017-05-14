@@ -1,46 +1,67 @@
 Frog {
-    Expr =  FunDef | IfExpr | Block | Assign | MathOp | Group | Identifier | Definition | Number | String | Bool
+    //start of all parsing
+    Expr = IfExpr | ForExpr | DefFun | DefVar | AssignExpr | Block | TermExpr
 
-    MathOp =  Mul | Div | Add | Sub | Eq | Neq | Lt | Lte | Gt | Gte | Term
-    Add = Expr "+"  Term
-    Sub = Expr "-"  Term
-    Mul = Expr "*"  Term
-    Div = Expr "/"  Term
-    Eq  = Expr "==" Expr
-    Neq = Expr "!=" Expr
-    Lt  = Expr "<"  Expr
-    Lte = Expr "<=" Expr
-    Gt  = Expr ">"  Expr
-    Gte = Expr ">=" Expr
+    // a terminal expression: function call or literal or symbol
+    TermExpr = LtExpr | LteExpr | GtExpr | GteExpr | EqExpr | NeqExpr | AddExp
 
+    EqExpr  = TermExpr "==" TermExpr
+    NeqExpr = TermExpr "!=" TermExpr
+    LtExpr  = TermExpr "<"  TermExpr
+    LteExpr = TermExpr "<=" TermExpr
+    GtExpr  = TermExpr ">"  TermExpr
+    GteExpr = TermExpr ">=" TermExpr
 
-    Term = Group | FunCall | Identifier | Number | String | Bool
+    AddExp
+        = AddExp "+" MulExp  -- plus
+        | AddExp "-" MulExp  -- minus
+        | MulExp
 
-    Definition = Identifier "::" Type
-    Type = "int" | "string" | "boolean"
+    MulExp
+        = MulExp "*" PriExp  -- times
+        | MulExp "/" PriExp  -- divide
+        | PriExp
 
-    Assign = Identifier "->" Expr
-    Identifier = letter (letter|digit)*
+    PriExp
+        = "(" TermExpr ")"  -- paren
+        | "-" PriExp   -- neg
+        | FunCall
+        | ident
+        | lit
 
-    Group = "(" Expr ")"
+    ForExpr 
+        = "for" "(" ident "->" TermExpr "to" TermExpr ")" Block     -- to
+        | "for" "(" ident "->" TermExpr "downto" TermExpr ")" Block -- downto
+
+    // assignment
+    AssignExpr = ident "->" TermExpr
+
+    //grouping and conditions
     Block = "{" Expr* "}"
+    IfExpr    = "if" "(" TermExpr ")" Block ("else" Block)?
 
-    IfExpr    = "if" Block Block ("else" Block)?
-    
-    FunCall = Identifier "(" Arguments ")"
+    //function calls and variables
+    FunCall = ident "(" Arguments ")"
     Arguments = ListOf<Expr, ",">
+    DefVar  = ident "::" Type
+    DefFun  = "func" ident "(" Parameters ")" Block
+    Parameters = ListOf<ident, ",">
 
-    FunDef  = "func" Identifier "(" Parameters ")::" Type Block
-    Parameters = ListOf<Definition, ",">
+    //variable types
+    Type = "int" | "string" | "bool"
 
+    //various literals
+    lit = bool | int | str
+    int = digit+
     qq = "\""
-    String = qq (~qq any)+ qq
+    str = qq (~qq any)+ qq
+    bool = "true" | "false"
 
-    Bool = "true" | "false"
+    //definition of a symbol
+    ident = letter (letter|digit)*
 
-    Number = int
-    int    = digit+
-
+    // override space to include slash slash comments
+    // real version needs to support various unicode whitespace forms
     space := "\t" | " " | "\n" | comment
     comment = "//" (~"\n" any)*
 }
