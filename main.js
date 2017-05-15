@@ -16,7 +16,11 @@ globalScope.setSymbol("print",function(arg1){
     } else {
         console.log(arg1);
     }
-    return arg1;
+    return null;
+});
+globalScope.setSymbol("printRaw",function(arg1){
+    console.log(arg1);
+    return null;
 });
 
 var args = process.argv.slice(2);

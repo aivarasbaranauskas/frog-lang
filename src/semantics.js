@@ -1,22 +1,19 @@
-/**
- * Created by josh on 6/4/16.
- */
 var AST = require('./ast');
 
-function binop(op,a,b) {  return new AST.BinaryOp(op, a.toAST(), b.toAST()); }
+function binop(op,a,b) { return new AST.BinaryOp(op, a.toAST(), b.toAST()); }
 
 var operation = {
     int:   function (a)          { return new AST.MNumber(parseInt(this.sourceString, 10)); },
-    bool:  function (a)          { return new AST.MBoolean(a == "true"); },
+    bool:  function (a)          { return new AST.MBoolean(a.sourceString == "true"); },
     str:   function (a, text, b) { return new AST.MString(text.sourceString); },
-    ident: function (a, b)       { return new AST.MSymbol(this.sourceString, null) },
+    ident: function (a, b)       { return new AST.MSymbol(this.sourceString) },
 
     AddExp_plus: (a, _, b) => binop('add',a,b),
     AddExp_minus: (a, _, b) => binop('sub',a,b),
     MulExp_times: (a, _, b) => binop('mul',a,b),
     MulExp_divide: (a, _, b) => binop('div',a,b),
-    PriExp_paren: (_, a, _1) => a.toAST,
-    PriExp_neg: (_, a) => binop('mul', a, "-1"),
+    PriExp_paren: (_, a, _1) => a.toAST(),
+    PriExp_neg: (_, a) => new AST.InvertNumber(a.toAST()),
 
     LtExpr:  (a, _, b) => binop('lt', a,b),
     GtExpr:  (a, _, b) => binop('gt', a,b),
@@ -25,7 +22,7 @@ var operation = {
     EqExpr:  (a, _, b) => binop('eq', a,b),
     NeqExpr: (a, _, b) => binop('neq',a,b),
 
-    DefVar:     (ident, _, type) => ident.toAST(),
+    DefVar:     (ident, _, type) => new AST.DefVar(ident.toAST(), type.sourceString),
     AssignExpr: (a, _, b)  => new AST.Assignment(a.toAST(), b.toAST()),
 
     ForExpr_to: function (_, _1, ident, _2, val, _3, target, _4, body) {
@@ -45,7 +42,7 @@ var operation = {
     FunCall: (a,_1,b,_2) => new AST.FunctionCall(a.toAST(), b.toAST()),
     Arguments: (a) => a.asIteration().toAST(),
     Parameters: (a) => a.asIteration().toAST(),
-    DefFun: (_1, ident, _2, args, _3, block) => new AST.FunctionDef(ident.toAST(), args.toAST(), block.toAST())
+    DefFun: (_1, ident, _2, args, _3, _4, type, block) => new AST.FunctionDef(ident.toAST(), args.toAST(), type.sourceString, block.toAST())
 };
 module.exports = {
     load: function (gram) {

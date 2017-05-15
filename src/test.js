@@ -1,33 +1,4 @@
-// "use strict";
-
-// //Testai
-
-// var ohm = require('ohm-js');
-// var fs = require('fs');
-// var assert = require('assert');
-// var Scope = require('./ast').Scope;
-// var MSymbol = require('./ast').MSymbol;
-
-// var grammar = ohm.grammar(fs.readFileSync('src/grammar.ohm').toString());
-// var semantics = grammar.createSemantics();
-
-// var ASTBuilder = require('./semantics').load(semantics);
-
-// var GLOBAL = new Scope(null);
-// function test(input, answer) {
-//     var match = grammar.match(input);
-//     if(match.failed()) return console.log("input failed to match " + input + match.message);
-//     var ast = ASTBuilder(match).toAST();
-//     var result = ast.resolve(GLOBAL);
-//     console.log('result = ', result);
-//     assert.deepEqual(result.jsEquals(answer),true);
-//     console.log('success = ', result, answer);
-// }
-
 "use strict"
-/**
- * Created by josh on 6/4/16.
- */
 
 var ohm = require('ohm-js');
 var fs = require('fs');
@@ -61,17 +32,21 @@ function test(input, answer) {
 
 test('2*3+4', 2*3+4);
 test('2*(2*2)',2*2*2);
-// test('(2*3)*4',(2*3)*4);
-// test('4+3*2', 4+3*2);
-// test('(4+3)*2',(4+3)*2);
+test('(2*3)*4',(2*3)*4);
+test('4+3*2', 4+3*2);
+test('(4+3)*2',(4+3)*2);
 test('4/5',4/5);
 test('4-5',4-5);
 
 
 test('10',10);
+test('x::int', null);
 test('x -> 10',10);
 test('x',10);
 test('x * 2',20);
 
-test('{func fib(a) { if(a<=2){ 1 }else{ fib(a-2) + fib(a-1) } } fib(6) }', 8);
-test('{func fib(x) { if (x <= 2) { 1 } else { a -> 1 b -> 1 for (i -> 3 to x) { b -> a + b a -> b - a } b } } fib(6) }', 8);
+test('{func fib(a::int)::int { if (a <= 2) { 1 } else { fib(a - 2) + fib(a - 1) } } fib(6) }', 8);
+test('{func fib(x::int)::int { if (x <= 2) { 1 } else { a::int b::int a -> 1 b -> 1 for (i -> 3 to x) { b -> a + b a -> b - a } b } } fib(6) }', 8);
+
+test('{a::bool b::bool a -> true b -> false a == b }', false);
+test('{a::bool b::bool a -> true b -> true a == b }', true);

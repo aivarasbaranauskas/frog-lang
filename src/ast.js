@@ -37,7 +37,6 @@ class Block {
     }
     resolve(scope) {
         var vals = this.statements.map((expr) => expr.resolve(scope));
-        //only return the last one
         return vals.pop();
     }
 }
@@ -84,7 +83,30 @@ class MSymbol {
     }
 }
 
-
+class DefVar {
+    constructor(symbol, type) {
+        this.symbol = symbol;
+        this.type = type;
+    }
+    resolve(scope) {
+        var val = null;
+        switch(this.type) {
+            case 'int':
+                val = new MNumber(null);
+                break;
+            case 'string':
+                val = new MString(null);
+                break;
+            case 'bool':
+                val = new MBoolean(null);
+                break;
+            default:
+                throw new Error("Quark! What is '" + this.type + "'?");
+        }
+        scope.setSymbol(this.symbol.name, val);
+        return null;
+    }
+}
 
 class Assignment {
     constructor(sym, val) {
@@ -92,7 +114,15 @@ class Assignment {
         this.val = val;
     }
     resolve(scope) {
-        return scope.setSymbol(this.symbol.name, this.val.resolve(scope));
+        var variable = scope.getSymbol(this.symbol.name);
+        if (variable == null) {
+            throw new Error("Quark! Variable '" + this.symbol.name + "' is not defined!");
+        }
+        var value = this.val.resolve(scope);
+        if (value.constructor.name != variable.constructor.name) {
+            throw new Error("Quark! Type mismatch!");
+        }
+        return scope.setSymbol(this.symbol.name, value);
     }
 }
 
@@ -102,32 +132,43 @@ class FunctionCall {
         this.args = args;
     }
     resolve(scope) {
-        //lookup the real function from the symbol
         if(!scope.hasSymbol(this.fun.name)) throw new Error("cannot resolve symbol " + this.fun.name);
         var fun = scope.getSymbol(this.fun.name);
-        //resolve the args
         var args = this.args.map((arg) => arg.resolve(scope));
-        //execute the function
         return fun.apply(null,args);
     }
 }
 
 
 class FunctionDef {
-    constructor(sym, params, body) {
+    constructor(sym, params, type, body) {
         this.sym = sym;
         this.params = params;
+        this.type = type;
         this.body = body;
     }
     resolve(scope) {
-        //create a global function for this body
         var body = this.body;
         var params = this.params;
+        var type = this.type;
         return scope.setSymbol(this.sym.name,function() {
             var args = arguments;
             var scope2 = scope.makeSubScope();
-            params.forEach((param,i) => scope2.setSymbol(param.name,args[i]));
-            return body.resolve(scope2);
+            params.forEach((param,i) => {
+                param.resolve(scope2);
+                var a = new Assignment(param.symbol, args[i]);
+                a.resolve(scope2);
+            });
+            var bodyVal = body.resolve(scope2);
+            var typeMap = {
+                "int": "MNumber",
+                "string": "MString",
+                "bool": "MBoolean"
+            };
+            if (bodyVal.constructor.name != typeMap[type]) {
+                throw new Error("Quark! Bad return type of function! Expected " + type + ".");
+            }
+            return bodyVal;
         });
     }
 }
@@ -141,11 +182,20 @@ class ForLoop {
         this.body = body;
     }
     resolve(scope) {
-        for (var i = this.val.resolve(scope).val; i != this.target.resolve(scope).val; i = i + this.step) {
+        for (var i = this.val.resolve(scope).val; i != this.target.resolve(scope).val + this.step; i = i + this.step) {
             scope.setSymbol(this.ident.name, new MNumber(i));
             var ret = this.body.resolve(scope);
         }
         return ret;
+    }
+}
+
+class InvertNumber{
+    constructor(val) {
+        this.val = val;
+    }
+    resolve(scope) {
+        return new MNumber(-1 * this.val.resolve(scope).val);
     }
 }
 
@@ -161,5 +211,7 @@ module.exports = {
     Assignment: Assignment,
     FunctionCall: FunctionCall,
     FunctionDef: FunctionDef,
-    ForLoop: ForLoop
+    ForLoop: ForLoop,
+    InvertNumber: InvertNumber,
+    DefVar: DefVar
 };

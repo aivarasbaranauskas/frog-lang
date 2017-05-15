@@ -26,8 +26,8 @@ Frog {
         = "(" TermExpr ")"  -- paren
         | "-" PriExp   -- neg
         | FunCall
-        | ident
         | lit
+        | ident
 
     ForExpr 
         = "for" "(" ident "->" TermExpr "to" TermExpr ")" Block     -- to
@@ -44,8 +44,8 @@ Frog {
     FunCall = ident "(" Arguments ")"
     Arguments = ListOf<Expr, ",">
     DefVar  = ident "::" Type
-    DefFun  = "func" ident "(" Parameters ")" Block
-    Parameters = ListOf<ident, ",">
+    DefFun  = "func" ident "(" Parameters ")" "::" Type Block
+    Parameters = ListOf<DefVar, ",">
 
     //variable types
     Type = "int" | "string" | "bool"
