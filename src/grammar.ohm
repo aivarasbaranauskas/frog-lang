@@ -48,7 +48,7 @@ Frog {
     Parameters = ListOf<DefVar, ",">
 
     //variable types
-    Type = "int" | "string" | "bool"
+    Type = "int" | "string" | "bool" | "void"
 
     //various literals
     lit = bool | int | str

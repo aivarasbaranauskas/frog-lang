@@ -18,6 +18,9 @@ class BinaryOp {
     resolve(scope) {
         var a = this.A.resolve(scope).val;
         var b = this.B.resolve(scope).val;
+        if (a.constructor.name != b.constructor.name) {
+            throw new Error('Quark! Type mismatch!');
+        }
         if(this.op == 'sub') return new MNumber(a-b);
         if(this.op == 'add') return new MNumber(a+b);
         if(this.op == 'mul') return new MNumber(a*b);
@@ -69,7 +72,7 @@ class Scope {
     getSymbol(name) {
         if(this.storage[name]) return this.storage[name];
         if(this.parent) return this.parent.getSymbol(name);
-        return null;
+        throw new Error("Quark! " + name + " is not defined.");
     }
 }
 
@@ -115,14 +118,12 @@ class Assignment {
     }
     resolve(scope) {
         var variable = scope.getSymbol(this.symbol.name);
-        if (variable == null) {
-            throw new Error("Quark! Variable '" + this.symbol.name + "' is not defined!");
-        }
         var value = this.val.resolve(scope);
         if (value.constructor.name != variable.constructor.name) {
             throw new Error("Quark! Type mismatch!");
         }
-        return scope.setSymbol(this.symbol.name, value);
+        scope.setSymbol(this.symbol.name, value);
+        return null;
     }
 }
 
@@ -132,7 +133,6 @@ class FunctionCall {
         this.args = args;
     }
     resolve(scope) {
-        if(!scope.hasSymbol(this.fun.name)) throw new Error("cannot resolve symbol " + this.fun.name);
         var fun = scope.getSymbol(this.fun.name);
         var args = this.args.map((arg) => arg.resolve(scope));
         return fun.apply(null,args);
@@ -163,10 +163,14 @@ class FunctionDef {
             var typeMap = {
                 "int": "MNumber",
                 "string": "MString",
-                "bool": "MBoolean"
+                "bool": "MBoolean",
+                "void": null
             };
-            if (bodyVal.constructor.name != typeMap[type]) {
+            if (typeMap[type] != null && bodyVal.constructor.name != typeMap[type]) {
                 throw new Error("Quark! Bad return type of function! Expected " + type + ".");
+            }
+            if (typeMap[type] == null) {
+                return null;
             }
             return bodyVal;
         });

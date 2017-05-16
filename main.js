@@ -11,7 +11,7 @@ var gram = ohm.grammar(fs.readFileSync('./src/grammar.ohm').toString());
 var globalScope = new Scope();
 var sem = Semantics.load(gram);
 globalScope.setSymbol("print",function(arg1){
-    if (arg1.val) {
+    if (arg1 && arg1.val) {
         console.log(arg1.val);
     } else {
         console.log(arg1);

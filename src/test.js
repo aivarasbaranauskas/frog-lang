@@ -41,7 +41,7 @@ test('4-5',4-5);
 
 test('10',10);
 test('x::int', null);
-test('x -> 10',10);
+test('x -> 10',null);
 test('x',10);
 test('x * 2',20);
 

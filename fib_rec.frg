@@ -1,5 +1,5 @@
 {
-    func fib(a)
+    func fib(a::int)::int
     {
         if (a <= 2) {
             1
