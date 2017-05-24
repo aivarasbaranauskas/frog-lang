@@ -42,7 +42,8 @@ var operation = {
     FunCall: (a,_1,b,_2) => new AST.FunctionCall(a.toAST(), b.toAST()),
     Arguments: (a) => a.asIteration().toAST(),
     Parameters: (a) => a.asIteration().toAST(),
-    DefFun: (_1, ident, _2, args, _3, _4, type, block) => new AST.FunctionDef(ident.toAST(), args.toAST(), type.sourceString, block.toAST())
+    DefFun: (_1, ident, _2, args, _3, _4, type, block) => new AST.FunctionDef(ident.toAST(), args.toAST(), type.sourceString, block.toAST()),
+    DefLamda: (_1, args, _2, _3, type, _4, block) => new AST.LambdaDef(args.toAST(), type.sourceString, block.toAST()),
 };
 module.exports = {
     load: function (gram) {

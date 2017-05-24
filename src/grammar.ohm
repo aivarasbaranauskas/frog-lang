@@ -3,7 +3,7 @@ Frog {
     Expr = IfExpr | ForExpr | DefFun | DefVar | AssignExpr | Block | TermExpr
 
     // a terminal expression: function call or literal or symbol
-    TermExpr = LtExpr | LteExpr | GtExpr | GteExpr | EqExpr | NeqExpr | AddExp
+    TermExpr = DefLamda | LtExpr | LteExpr | GtExpr | GteExpr | EqExpr | NeqExpr | AddExp
 
     EqExpr  = TermExpr "==" TermExpr
     NeqExpr = TermExpr "!=" TermExpr
@@ -45,10 +45,11 @@ Frog {
     Arguments = ListOf<Expr, ",">
     DefVar  = ident "::" Type
     DefFun  = "func" ident "(" Parameters ")" "::" Type Block
+    DefLamda = "(" Arguments ")" "::" Type "=>" Block
     Parameters = ListOf<DefVar, ",">
 
     //variable types
-    Type = "int" | "string" | "bool" | "void"
+    Type = "int" | "string" | "bool" | "void" | "lambda"
 
     //various literals
     lit = bool | int | str

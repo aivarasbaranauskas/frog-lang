@@ -8,6 +8,7 @@ class Atom {
 class MNumber extends Atom {}
 class MBoolean extends Atom {}
 class MString extends Atom {}
+class MLambda extends Atom {}
 
 class BinaryOp {
     constructor(op, A, B) {
@@ -103,6 +104,9 @@ class DefVar {
             case 'bool':
                 val = new MBoolean(null);
                 break;
+            case 'lambda':
+                val = new MLambda(null);
+                break;
             default:
                 throw new Error("Quark! What is '" + this.type + "'?");
         }
@@ -120,7 +124,7 @@ class Assignment {
         var variable = scope.getSymbol(this.symbol.name);
         var value = this.val.resolve(scope);
         if (value.constructor.name != variable.constructor.name) {
-            throw new Error("Quark! Type mismatch!");
+            throw new Error("Quark! Type mismatch! Expected " + variable.constructor.name + " got " + value.constructor.name);
         }
         scope.setSymbol(this.symbol.name, value);
         return null;
@@ -134,6 +138,9 @@ class FunctionCall {
     }
     resolve(scope) {
         var fun = scope.getSymbol(this.fun.name);
+        if (fun.constructor && fun.constructor.name == "MLambda") {
+            fun = fun.val;
+        }
         var args = this.args.map((arg) => arg.resolve(scope));
         return fun.apply(null,args);
     }
@@ -164,10 +171,48 @@ class FunctionDef {
                 "int": "MNumber",
                 "string": "MString",
                 "bool": "MBoolean",
+                "lambda": "MLambda",
                 "void": null
             };
             if (typeMap[type] != null && bodyVal.constructor.name != typeMap[type]) {
                 throw new Error("Quark! Bad return type of function! Expected " + type + ".");
+            }
+            if (typeMap[type] == null) {
+                return null;
+            }
+            return bodyVal;
+        });
+    }
+}
+
+class LambdaDef {
+    constructor(params, type, body) {
+        this.params = params;
+        this.type = type;
+        this.body = body;
+    }
+    resolve(scope) {
+        var body = this.body;
+        var params = this.params;
+        var type = this.type;
+        return new MLambda(function() {
+            var args = arguments;
+            var scope2 = scope.makeSubScope();
+            params.forEach((param,i) => {
+                param.resolve(scope2);
+                var a = new Assignment(param.symbol, args[i]);
+                a.resolve(scope2);
+            });
+            var bodyVal = body.resolve(scope2);
+            var typeMap = {
+                "int": "MNumber",
+                "string": "MString",
+                "bool": "MBoolean",
+                "lambda": "MLambda",
+                "void": null
+            };
+            if (typeMap[type] != null && bodyVal.constructor.name != typeMap[type]) {
+                throw new Error("Quark! Bad return type of lambda function! Expected " + type + ".");
             }
             if (typeMap[type] == null) {
                 return null;
@@ -207,6 +252,7 @@ module.exports = {
     MNumber: MNumber,
     MBoolean: MBoolean,
     MString: MString,
+    MLambda: MLambda,
     BinaryOp: BinaryOp,
     MSymbol: MSymbol,
     Scope: Scope,
@@ -215,6 +261,7 @@ module.exports = {
     Assignment: Assignment,
     FunctionCall: FunctionCall,
     FunctionDef: FunctionDef,
+    LambdaDef: LambdaDef,
     ForLoop: ForLoop,
     InvertNumber: InvertNumber,
     DefVar: DefVar
