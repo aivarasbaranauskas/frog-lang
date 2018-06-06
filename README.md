@@ -1,19 +1,6 @@
-# Make programming great again
+# Frog programing language
 
-### Frog programavimo kalba
+### This is mirror repo for University repo in bitbucket.
 
-Čia talpinamas 2017 PKT modulio "Make programming great again" komandos Frog kalbos projektas
+Learning project I did at University. More info in old readme (it's in lithuanian).
 
-Projektą atlieka: Aivaras Baranauskas, Dovilė Gedminaitė, Tadas Radvilavičius.
-
-# Paleidimas
-
-Reikia turėti Node.js
-
-### Diegimas
-
-npm install
-
-### Paleidimas
-
-node scr/test.js
