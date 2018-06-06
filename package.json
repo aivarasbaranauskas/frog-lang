@@ -1,0 +1,19 @@
+{
+  "name": "frog",
+  "version": "0.0.1",
+  "description": "frog programming language",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://aivaras_brn@bitbucket.org/ktu_pkt/projektas2017.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "homepage": "https://bitbucket.org/ktu_pkt/projektas2017#readme",
+  "dependencies": {
+    "ohm-js": "^0.13.1"
+  }
+}
